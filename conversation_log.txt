@@ -1,0 +1,20 @@
+Conversation log created on 2026-06-02 Asia/Hong_Kong.
+
+User provided AGENTS.md instructions for /Users/chongcclhk/Documents/jensen:
+- Reply completely in Traditional Chinese (Taiwan).
+- After code/task completion, check whether the current project is linked to GitHub. If linked, automatically stage, commit and push.
+- Maintain a conversation log file in the current folder; create it if missing, otherwise append without overwriting.
+
+User request:
+"please very accurately extract a list of stock that jensen huang has mentioned or invested from new to old and also the time, need to be accurate"
+
+Assistant actions:
+- Inspected /Users/chongcclhk/Documents/jensen. The folder contained only .git and no remote.
+- Researched public sources because the request depends on current securities, SEC filings, and 2026 public events.
+- Used primary/official sources where possible: SEC EDGAR, NVIDIA Newsroom/Investor Relations, NVIDIA official GTC Taipei blog, Marvell SEC exhibit.
+- Created jensen_huang_stocks_extraction.md and jensen_huang_stocks_extraction.csv.
+- Distinguished Jensen Huang personal beneficial ownership (NVDA) from NVIDIA corporate investments/holdings and public company mentions.
+
+Assistant response summary to be given:
+- Confirmed the extraction files and explained the main caveat: non-NVDA investments are NVIDIA corporate investments, not Jensen Huang personal investments.
+- Reported that the repository has .git but no remote, so a local commit can be made but no GitHub push is possible unless a remote is added.
