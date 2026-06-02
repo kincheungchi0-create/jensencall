@@ -62,3 +62,22 @@ Deployment result:
 - Vercel production URL: https://jensencall.vercel.app/
 - Initial deployment URL observed: https://jensencall-n72l976jg-kincheungchi0-1971s-projects.vercel.app/
 - Verified live site at https://jensencall.vercel.app/: title jensencall, 39 rendered rows, first stock MRVL, metrics 39 / 17 / 25 / 2026-06-02.
+
+---
+
+User request:
+"website should be very mobile friendly"
+
+Assistant actions:
+- Converted the mobile layout from a horizontally scrolling wide table into stacked stock cards at small breakpoints.
+- Added row-level mobile labels via data-label attributes.
+- Made summary cards single-column on very narrow screens.
+- Made download buttons, tabs, and search input larger and easier to tap on mobile.
+- Added tab aria-selected state updates.
+- Ran npm run build successfully.
+- Verified local site in the in-app browser: 39 rows rendered; mobile/card CSS active with table min-width 0 and block rows/cells.
+- Verified 390px mobile viewport using local Chrome: no horizontal overflow, scrollWidth equals clientWidth, 39 rows rendered, first stock MRVL, metrics 39 / 17 / 25 / 2026-06-02.
+- Verified mobile interaction: Invested tab plus NVDA search returns one NVDA row.
+
+Assistant response summary to be given:
+- Confirm mobile-friendly update, production deployment status, and final live URL.

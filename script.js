@@ -11,6 +11,15 @@ const mentionPattern = /mention|keynote|press release|event material|cloud ecosy
 const stockRows = document.querySelector("#stockRows");
 const searchInput = document.querySelector("#searchInput");
 const tabs = Array.from(document.querySelectorAll(".tab"));
+const columnLabels = {
+  latest_verified_time: "Time",
+  stock: "Stock",
+  company: "Company",
+  relationship_type: "Type",
+  evidence_summary: "Evidence",
+  confidence: "Confidence",
+  source_url: "Source",
+};
 
 function parseCsv(text) {
   const rows = [];
@@ -100,7 +109,7 @@ function renderTable() {
   const rows = state.rows.filter(matchesFilter).filter(matchesSearch);
 
   if (!rows.length) {
-    stockRows.innerHTML = '<tr><td colspan="7">No rows</td></tr>';
+    stockRows.innerHTML = '<tr class="empty-row"><td colspan="7">No rows</td></tr>';
     return;
   }
 
@@ -108,13 +117,13 @@ function renderTable() {
     .map(
       (row) => `
         <tr>
-          <td class="time">${escapeHtml(row.latest_verified_time)}</td>
-          <td class="stock">${escapeHtml(row.stock)}</td>
-          <td class="company">${escapeHtml(row.company)}</td>
-          <td class="relationship">${escapeHtml(row.relationship_type)}</td>
-          <td class="evidence">${escapeHtml(row.evidence_summary)}</td>
-          <td class="confidence">${escapeHtml(row.confidence)}</td>
-          <td class="source"><a href="${escapeHtml(row.source_url)}" target="_blank" rel="noreferrer">Open</a></td>
+          <td class="time" data-label="${columnLabels.latest_verified_time}">${escapeHtml(row.latest_verified_time)}</td>
+          <td class="stock" data-label="${columnLabels.stock}">${escapeHtml(row.stock)}</td>
+          <td class="company" data-label="${columnLabels.company}">${escapeHtml(row.company)}</td>
+          <td class="relationship" data-label="${columnLabels.relationship_type}">${escapeHtml(row.relationship_type)}</td>
+          <td class="evidence" data-label="${columnLabels.evidence_summary}">${escapeHtml(row.evidence_summary)}</td>
+          <td class="confidence" data-label="${columnLabels.confidence}">${escapeHtml(row.confidence)}</td>
+          <td class="source" data-label="${columnLabels.source_url}"><a href="${escapeHtml(row.source_url)}" target="_blank" rel="noreferrer">Open</a></td>
         </tr>
       `,
     )
@@ -129,7 +138,11 @@ function render() {
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     state.filter = tab.dataset.filter;
-    tabs.forEach((item) => item.classList.toggle("active", item === tab));
+    tabs.forEach((item) => {
+      const isActive = item === tab;
+      item.classList.toggle("active", isActive);
+      item.setAttribute("aria-selected", String(isActive));
+    });
     renderTable();
   });
 });
@@ -151,4 +164,3 @@ fetch("jensen_huang_stocks_extraction.csv")
   .catch((error) => {
     stockRows.innerHTML = `<tr><td colspan="7">${escapeHtml(error.message)}</td></tr>`;
   });
-

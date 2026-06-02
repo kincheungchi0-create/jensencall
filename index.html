@@ -40,9 +40,9 @@
 
       <section class="controls" aria-label="Table controls">
         <div class="tabs" role="tablist" aria-label="Dataset">
-          <button class="tab active" data-filter="all" type="button">All</button>
-          <button class="tab" data-filter="investment" type="button">Invested</button>
-          <button class="tab" data-filter="mention" type="button">Mentioned</button>
+          <button class="tab active" data-filter="all" type="button" role="tab" aria-selected="true">All</button>
+          <button class="tab" data-filter="investment" type="button" role="tab" aria-selected="false">Invested</button>
+          <button class="tab" data-filter="mention" type="button" role="tab" aria-selected="false">Mentioned</button>
         </div>
         <label class="search">
           <span>Search</span>
@@ -77,4 +77,3 @@
     <script src="script.js" defer></script>
   </body>
 </html>
-
