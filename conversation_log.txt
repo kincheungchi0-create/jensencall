@@ -54,3 +54,11 @@ Assistant actions:
 Assistant response summary to be given:
 - Report GitHub repo URL and Vercel deployment URL once created.
 - Mention local/remote commit hash and any deployment verification result.
+
+Deployment result:
+- GitHub repository created: https://github.com/kincheungchi0-create/jensencall
+- Repository pushed to origin/main.
+- Vercel project created under kincheungchi0-1971's projects.
+- Vercel production URL: https://jensencall.vercel.app/
+- Initial deployment URL observed: https://jensencall-n72l976jg-kincheungchi0-1971s-projects.vercel.app/
+- Verified live site at https://jensencall.vercel.app/: title jensencall, 39 rendered rows, first stock MRVL, metrics 39 / 17 / 25 / 2026-06-02.
