@@ -35,3 +35,22 @@ Assistant actions:
 Assistant response summary to be given:
 - Provide the Excel workbook link.
 - Note that the repo still has no GitHub remote, so only local commit is possible unless a remote is added.
+
+---
+
+User request:
+"pls create a repo jensencall and deploy in vercel"
+
+Assistant actions:
+- Confirmed GitHub CLI is authenticated as kincheungchi0-create.
+- Confirmed repository kincheungchi0-create/jensencall did not already exist.
+- Added a deployable static website for the Jensen Huang / NVIDIA stock extraction.
+- Added index.html, styles.css, script.js, package.json, vercel.json, README.md, scripts/build.mjs, and .gitignore.
+- The website loads the existing CSV, renders searchable/filterable All / Invested / Mentioned stock rows, and links to Excel/CSV downloads.
+- Ran npm run build successfully.
+- Started a local HTTP server at http://localhost:4173 and verified the page in the in-app browser.
+- Browser verification: 39 total rows, 17 investment/holding rows, 25 mention rows; Invested tab filters to 17 rows; searching NVDA returns the Jensen Huang personal beneficial ownership row.
+
+Assistant response summary to be given:
+- Report GitHub repo URL and Vercel deployment URL once created.
+- Mention local/remote commit hash and any deployment verification result.

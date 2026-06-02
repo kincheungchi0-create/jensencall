@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>jensencall</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar" aria-label="Overview">
+        <div>
+          <p class="eyebrow">Jensen Huang / NVIDIA Stock Extraction</p>
+          <h1>jensencall</h1>
+        </div>
+        <div class="actions" aria-label="Downloads">
+          <a class="button" href="outputs/jensen_excel/jensen_huang_stocks_extraction.xlsx">Excel</a>
+          <a class="button secondary" href="jensen_huang_stocks_extraction.csv">CSV</a>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="Summary">
+        <article class="metric-card">
+          <span>Total Rows</span>
+          <strong id="totalRows">-</strong>
+        </article>
+        <article class="metric-card">
+          <span>Investment / Holding</span>
+          <strong id="investmentRows">-</strong>
+        </article>
+        <article class="metric-card">
+          <span>Mentions</span>
+          <strong id="mentionRows">-</strong>
+        </article>
+        <article class="metric-card wide">
+          <span>Research Timestamp</span>
+          <strong>2026-06-02</strong>
+        </article>
+      </section>
+
+      <section class="controls" aria-label="Table controls">
+        <div class="tabs" role="tablist" aria-label="Dataset">
+          <button class="tab active" data-filter="all" type="button">All</button>
+          <button class="tab" data-filter="investment" type="button">Invested</button>
+          <button class="tab" data-filter="mention" type="button">Mentioned</button>
+        </div>
+        <label class="search">
+          <span>Search</span>
+          <input id="searchInput" type="search" autocomplete="off" />
+        </label>
+      </section>
+
+      <section class="table-panel" aria-label="Stock list">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Stock</th>
+                <th>Company</th>
+                <th>Relationship</th>
+                <th>Evidence</th>
+                <th>Confidence</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="stockRows">
+              <tr>
+                <td colspan="7">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
+

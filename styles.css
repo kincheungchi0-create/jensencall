@@ -1,0 +1,293 @@
+:root {
+  color-scheme: light;
+  --ink: #12212f;
+  --muted: #65758a;
+  --line: #d7e0ea;
+  --panel: #ffffff;
+  --panel-soft: #f4f8fb;
+  --accent: #0f5d7e;
+  --accent-2: #a85522;
+  --accent-soft: #e4f1f6;
+  --shadow: 0 18px 45px rgba(18, 33, 47, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(15, 93, 126, 0.12), transparent 32rem),
+    linear-gradient(315deg, rgba(168, 85, 34, 0.08), transparent 26rem),
+    #f7fafc;
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+.app-shell {
+  width: min(1440px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 28px 0 44px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 56px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 750;
+}
+
+.button.secondary {
+  background: #fff;
+  color: var(--accent);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.metric-card {
+  min-height: 92px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.metric-card span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.metric-card strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+}
+
+.tab {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.search input {
+  width: min(360px, 44vw);
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  padding: 0 12px;
+  outline: none;
+}
+
+.search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 93, 126, 0.14);
+}
+
+.table-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.table-scroll {
+  max-height: calc(100vh - 300px);
+  min-height: 440px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #12355b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+td {
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+tbody tr:nth-child(odd) td {
+  background: #f8fbfd;
+}
+
+td.time {
+  width: 178px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+td.stock {
+  width: 110px;
+  color: var(--accent);
+  font-weight: 850;
+}
+
+td.company {
+  width: 210px;
+  font-weight: 720;
+}
+
+td.relationship {
+  width: 250px;
+}
+
+td.evidence {
+  width: 390px;
+}
+
+td.confidence {
+  width: 120px;
+}
+
+td.source {
+  width: 92px;
+}
+
+td.source a {
+  color: var(--accent-2);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    width: min(100vw - 18px, 1440px);
+    padding-top: 10px;
+  }
+
+  .topbar,
+  .controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search,
+  .search input {
+    width: 100%;
+  }
+
+  .table-scroll {
+    max-height: none;
+  }
+}
+
