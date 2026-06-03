@@ -3,74 +3,142 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>jensencall</title>
+    <title>AI Model Releases vs Alphabet Stock</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="topbar" aria-label="Overview">
-        <div>
-          <p class="eyebrow">Jensen Huang / NVIDIA Stock Extraction</p>
-          <h1>jensencall</h1>
+      <section class="hero" aria-label="Overview">
+        <div class="hero-copy">
+          <p class="eyebrow">Event Study / Alphabet GOOGL</p>
+          <h1>AI 模型發布後，Google 股價怎麼反應？</h1>
+          <p class="lede">
+            追蹤 OpenAI、Google、Anthropic、Meta、Mistral AI、xAI 與 DeepSeek
+            的主要模型發布，計算 Alphabet Class A 股價在發布後 1、3、5 個美股交易日的反應，
+            並用 QQQ 作為科技股大盤基準。
+          </p>
         </div>
         <div class="actions" aria-label="Downloads">
-          <a class="button" href="outputs/jensen_excel/jensen_huang_stocks_extraction.xlsx">Excel</a>
-          <a class="button secondary" href="jensen_huang_stocks_extraction.csv">CSV</a>
+          <a class="button" href="ai_model_google_reaction.csv">CSV</a>
+          <a class="button secondary" href="ai_model_google_reaction.md">Research Note</a>
         </div>
       </section>
 
-      <section class="summary-grid" aria-label="Summary">
+      <section class="summary-grid" aria-label="Key metrics">
         <article class="metric-card">
-          <span>Total Rows</span>
-          <strong id="totalRows">-</strong>
-        </article>
-        <article class="metric-card">
-          <span>Investment / Holding</span>
-          <strong id="investmentRows">-</strong>
+          <span>事件數</span>
+          <strong id="totalEvents">-</strong>
+          <small>截至 2026-06-03</small>
         </article>
         <article class="metric-card">
-          <span>Mentions</span>
-          <strong id="mentionRows">-</strong>
+          <span>GOOGL +1D 中位數</span>
+          <strong id="medianD1">-</strong>
+          <small>發布日或下一交易日起算</small>
         </article>
-        <article class="metric-card wide">
-          <span>Research Timestamp</span>
-          <strong>2026-06-02</strong>
+        <article class="metric-card">
+          <span>Google 自家發布平均</span>
+          <strong id="googleAvg">-</strong>
+          <small>GOOGL +1D</small>
         </article>
+        <article class="metric-card">
+          <span>競品發布平均</span>
+          <strong id="competitorAvg">-</strong>
+          <small>GOOGL +1D</small>
+        </article>
+      </section>
+
+      <section class="analysis-band" aria-label="Interpretation">
+        <div class="section-heading">
+          <p class="eyebrow">Main Read</p>
+          <h2>不是所有競品模型都會打壓 Google；市場更在意「搜尋威脅」與「AI 成本敘事」。</h2>
+        </div>
+        <div class="insight-grid">
+          <article class="insight-card">
+            <strong id="overallInsight">-</strong>
+            <span>整體樣本顯示反應方向不固定，模型發布本身通常不是單一決定因素。</span>
+          </article>
+          <article class="insight-card">
+            <strong id="googleInsight">-</strong>
+            <span>Google 自家 Gemini 類事件在展示產品整合、搜尋分發與開發者可用性時，反應通常較佳。</span>
+          </article>
+          <article class="insight-card">
+            <strong id="competitorInsight">-</strong>
+            <span>競品發布若被解讀為直接威脅搜尋毛利，或改變 AI 基礎設施成本假設，股價壓力較明顯。</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="tool-panel" aria-label="One day reaction chart">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Reaction Map</p>
+            <h2>GOOGL +1 交易日報酬</h2>
+          </div>
+          <p class="panel-note">綠色代表上漲，紅色代表下跌；虛線為 0%。</p>
+        </div>
+        <div id="reactionChart" class="reaction-chart" aria-live="polite"></div>
       </section>
 
       <section class="controls" aria-label="Table controls">
         <div class="tabs" role="tablist" aria-label="Dataset">
           <button class="tab active" data-filter="all" type="button" role="tab" aria-selected="true">All</button>
-          <button class="tab" data-filter="investment" type="button" role="tab" aria-selected="false">Invested</button>
-          <button class="tab" data-filter="mention" type="button" role="tab" aria-selected="false">Mentioned</button>
+          <button class="tab" data-filter="google" type="button" role="tab" aria-selected="false">Google</button>
+          <button class="tab" data-filter="competitor" type="button" role="tab" aria-selected="false">Competitors</button>
+          <button class="tab" data-filter="positive" type="button" role="tab" aria-selected="false">Positive</button>
+          <button class="tab" data-filter="negative" type="button" role="tab" aria-selected="false">Negative</button>
         </div>
-        <label class="search">
-          <span>Search</span>
-          <input id="searchInput" type="search" autocomplete="off" />
-        </label>
+        <div class="control-group">
+          <label class="select-wrap">
+            <span>Firm</span>
+            <select id="firmSelect">
+              <option value="all">All firms</option>
+            </select>
+          </label>
+          <label class="search">
+            <span>Search</span>
+            <input id="searchInput" type="search" autocomplete="off" />
+          </label>
+        </div>
       </section>
 
-      <section class="table-panel" aria-label="Stock list">
+      <section class="table-panel" aria-label="Event table">
         <div class="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>Time</th>
-                <th>Stock</th>
-                <th>Company</th>
-                <th>Relationship</th>
-                <th>Evidence</th>
-                <th>Confidence</th>
-                <th>Source</th>
+                <th>Date</th>
+                <th>Firm / Model</th>
+                <th>Type</th>
+                <th>Trading Day</th>
+                <th>GOOGL +1D</th>
+                <th>Excess vs QQQ</th>
+                <th>GOOGL +5D</th>
+                <th>Note / Source</th>
               </tr>
             </thead>
-            <tbody id="stockRows">
+            <tbody id="eventRows">
               <tr>
-                <td colspan="7">Loading...</td>
+                <td colspan="8">Loading...</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section class="method-band" aria-label="Methodology">
+        <div>
+          <p class="eyebrow">Method</p>
+          <h2>計算方式</h2>
+        </div>
+        <p>
+          事件日採用官方發布日當天或下一個美股交易日；報酬率用前一交易日調整收盤價，
+          比較事件日、+1、+3、+5 交易日收盤價。若模型於盤後發布，立即反應可能落在 +1D 欄位。
+          Excess return 為 GOOGL 報酬減去 QQQ 同期報酬。這是事件研究，不是因果證明。
+        </p>
+        <p>
+          模型日期來源以各公司官方公告為主；股價來源為 Yahoo Finance chart data
+          的 GOOGL 與 QQQ 調整收盤價。
+        </p>
       </section>
     </main>
 

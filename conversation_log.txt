@@ -81,3 +81,38 @@ Assistant actions:
 
 Assistant response summary to be given:
 - Confirm mobile-friendly update, production deployment status, and final live URL.
+
+---
+
+Timestamp: 2026-06-03 10:26:48 HKT
+
+User request:
+"please analyse when new AI model release (from various firm), how google price react? please put the analysis in website"
+
+Assistant actions:
+- Inspected the existing static `jensencall` website and confirmed the repo is linked to `origin/main`.
+- Researched current and historical AI model release dates from official company sources where possible, including OpenAI, Google, Anthropic, Meta, Mistral AI, xAI, and DeepSeek.
+- Built a reusable generator script at `scripts/generate-ai-model-reaction.mjs`.
+- Generated `ai_model_google_reaction.csv` and `ai_model_google_reaction.md`.
+- Used Yahoo Finance chart data for adjusted-close `GOOGL` reactions and `QQQ` as the market proxy.
+- Calculated event-day, +1, +3, and +5 trading-day reactions, plus excess return versus QQQ.
+- Included special handling for DeepSeek-R1: official release date on 2025-01-20 and separate 2025-01-27 market-digestion row.
+- Corrected xAI event dates to the official xAI pages: Grok 3 on 2025-02-19 and Grok 4 on 2025-07-09.
+- Rebuilt the website into an AI model release event-study dashboard with KPI cards, interpretation cards, a +1D reaction bar chart, filters, search, source links, and methodology notes.
+- Updated `README.md`, `package.json`, and `scripts/build.mjs`.
+- Ran `npm run generate:ai-reaction` and `npm run build` successfully.
+- Started a local server at `http://localhost:4173`.
+- Verified the local site in the in-app browser:
+  - 40 event rows rendered.
+  - KPI values: median GOOGL +1D -1.00%, Google events average +0.58%, competitor events average -0.40%.
+  - Google tab filtered to 8 rows.
+  - DeepSeek search under All returned 2 rows.
+  - Browser console had no warning/error logs.
+  - Mobile 390px viewport had no horizontal overflow; `scrollWidth` equaled 376px with card-style table rows.
+
+Assistant response summary to be given:
+- Confirm the website now contains the AI model release / Alphabet stock reaction analysis.
+- Mention the main findings: 40 events, +1D median -1.00%, Google release events average +0.58%, competitor release events average -0.40%, event study is not causal proof.
+- Mention local URL `http://localhost:4173`.
+- Mention build and browser/mobile verification passed.
+ 

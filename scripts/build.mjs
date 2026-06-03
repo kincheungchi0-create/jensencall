@@ -10,6 +10,8 @@ const files = [
   ["index.html", "index.html"],
   ["styles.css", "styles.css"],
   ["script.js", "script.js"],
+  ["ai_model_google_reaction.csv", "ai_model_google_reaction.csv"],
+  ["ai_model_google_reaction.md", "ai_model_google_reaction.md"],
   ["jensen_huang_stocks_extraction.csv", "jensen_huang_stocks_extraction.csv"],
   ["jensen_huang_stocks_extraction.md", "jensen_huang_stocks_extraction.md"],
   [
@@ -28,4 +30,3 @@ for (const [srcRel, destRel] of files) {
 }
 
 console.log(`Built ${dist}`);
-
