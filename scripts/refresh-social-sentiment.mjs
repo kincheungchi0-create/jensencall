@@ -34,7 +34,67 @@ const aiStocks = [
   "VRT",
   "ORCL",
   "DELL",
+  "SMCI",
+  "HPE",
+  "ANET",
+  "ASML",
+  "AMAT",
+  "LRCX",
+  "KLAC",
+  "QCOM",
+  "TXN",
+  "NXPI",
+  "MCHP",
+  "MPWR",
+  "TER",
+  "STM",
+  "WDC",
+  "STX",
+  "IBM",
+  "AAPL",
+  "CRM",
+  "SNOW",
+  "ADBE",
+  "DDOG",
+  "MDB",
+  "PANW",
+  "ZS",
+  "VST",
+  "CEG",
+  "ETN",
+  "PWR",
+  "GEV",
+  "NRG",
+  "EQIX",
+  "DLR",
+  "NBIS",
+  "HUT",
 ];
+
+const tickerAliases = {
+  TSM: ["TSM", "TSMC"],
+  GOOGL: ["GOOGL", "GOOG", "Alphabet"],
+  AAPL: ["AAPL", "Apple"],
+  MSFT: ["MSFT", "Microsoft"],
+  AMZN: ["AMZN", "Amazon"],
+  META: ["META"],
+  IBM: ["IBM"],
+  HPE: ["HPE"],
+  CRM: ["$CRM", "Salesforce"],
+  SNOW: ["$SNOW", "Snowflake"],
+  DDOG: ["$DDOG", "Datadog"],
+  MDB: ["$MDB", "MongoDB"],
+  ARM: ["ARM", "Arm Holdings"],
+  HUT: ["$HUT", "Hut 8", "Hut8"],
+  VST: ["VST", "Vistra"],
+  CEG: ["CEG", "Constellation Energy"],
+  GEV: ["GEV", "GE Vernova"],
+  PWR: ["PWR", "Quanta Services"],
+  ETN: ["ETN", "Eaton"],
+  EQIX: ["EQIX", "Equinix"],
+  DLR: ["DLR", "Digital Realty"],
+  NBIS: ["NBIS", "Nebius"],
+};
 
 const aiTerms = [
   "ai",
@@ -47,12 +107,24 @@ const aiTerms = [
   "compute",
   "datacenter",
   "data center",
+  "data centers",
+  "data centre",
+  "data centres",
   "gpu",
   "hbm",
   "hyperscaler",
   "inference",
   "jensen",
+  "lithography",
+  "memory",
+  "networking",
+  "power demand",
+  "power grid",
   "rubin",
+  "semiconductor",
+  "semiconductors",
+  "server",
+  "servers",
   "tpu",
   "xpu",
 ];
@@ -70,6 +142,17 @@ const searchQueries = [
   "GOOGL AI",
   "TSMC AI",
   "CRWD AI",
+  "SMCI AI server",
+  "HPE AI server",
+  "ANET AI datacenter networking",
+  "ASML AMAT LRCX KLAC AI chip",
+  "QCOM edge AI",
+  "AAPL on device AI",
+  "CRM SNOW ADBE AI",
+  "PANW ZS CRWD AI cybersecurity",
+  "VST CEG ETN PWR AI data center power",
+  "EQIX DLR AI data center",
+  "NBIS HUT AI infrastructure",
 ];
 
 function sleep(ms) {
@@ -118,15 +201,23 @@ function redditUrl(url) {
 
 function normaliseTicker(ticker) {
   if (ticker === "TSMC") return "TSM";
+  if (ticker === "GOOG") return "GOOGL";
+  if (ticker === "HUT8") return "HUT";
   return ticker;
 }
 
 function tickersIn(text) {
-  const haystack = ` ${String(text ?? "").toUpperCase()} `;
+  const rawText = String(text ?? "");
+  const haystack = ` ${rawText.toUpperCase()} `;
   return aiStocks.filter((ticker) => {
-    const aliases = ticker === "TSM" ? ["TSM", "TSMC"] : [ticker];
-    return aliases.some((alias) => new RegExp(`(^|[^A-Z0-9])\\$?${alias}([^A-Z0-9]|$)`).test(haystack));
-  });
+    const aliases = tickerAliases[ticker] || [ticker];
+    return aliases.some((alias) => {
+      if (/^[A-Z0-9]{1,5}$/.test(alias)) {
+        return new RegExp(`(^|[^A-Z0-9])\\$?${alias}([^A-Z0-9]|$)`).test(haystack);
+      }
+      return rawText.toLowerCase().includes(alias.toLowerCase());
+    });
+  }).map(normaliseTicker);
 }
 
 function escapeRegex(value) {
@@ -288,6 +379,7 @@ function searchUrl(query) {
 }
 
 const candidates = new Map();
+const fetchWarnings = [];
 
 for (const query of searchQueries) {
   const url = searchUrl(query);
@@ -322,7 +414,13 @@ for (const candidate of posts) {
     rawItems.push(post);
     rawItems.push(...parseComments(html, post));
   } catch (error) {
+    fetchWarnings.push(`${candidate.title}: ${error.message}`);
     console.warn(`Thread failed: ${error.message}`);
+    rawItems.push({
+      ...candidate,
+      id: `search-${candidate.url.split("/comments/")[1]?.split("/")[0] || candidate.url}`,
+      type: "post",
+    });
   }
   await sleep(450);
 }
@@ -350,9 +448,14 @@ const payload = {
   source: "Public Reddit old.reddit.com search, top week, fetched without login",
   sourceUrls: posts.map((post) => post.url),
   searchedQueries: searchQueries,
+  warnings: fetchWarnings,
   note: "Stocktwits public sentiment pages were reviewed separately, but the unauthenticated pages exposed N/A scores during this refresh, so they were not used as numeric inputs.",
-  signals: signals.slice(0, 40),
+  signals: signals.slice(0, 80),
 };
+
+if (!payload.signals.length) {
+  throw new Error("Refresh returned 0 usable signals; keeping the previous social_ai_signals.json unchanged.");
+}
 
 await fs.writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`);
 

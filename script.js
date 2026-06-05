@@ -35,6 +35,41 @@ const aiStocks = [
   { ticker: "VRT", company: "Vertiv", theme: "AI datacenter power" },
   { ticker: "ORCL", company: "Oracle", theme: "Cloud AI capacity" },
   { ticker: "DELL", company: "Dell Technologies", theme: "AI servers" },
+  { ticker: "SMCI", company: "Super Micro Computer", theme: "AI server supply chain" },
+  { ticker: "HPE", company: "Hewlett Packard Enterprise", theme: "AI servers and networking" },
+  { ticker: "ANET", company: "Arista Networks", theme: "AI datacenter networking" },
+  { ticker: "ASML", company: "ASML", theme: "AI lithography supply chain" },
+  { ticker: "AMAT", company: "Applied Materials", theme: "Semiconductor equipment" },
+  { ticker: "LRCX", company: "Lam Research", theme: "Semiconductor equipment" },
+  { ticker: "KLAC", company: "KLA", theme: "Semiconductor process control" },
+  { ticker: "QCOM", company: "Qualcomm", theme: "Edge AI chips" },
+  { ticker: "TXN", company: "Texas Instruments", theme: "Industrial AI chips" },
+  { ticker: "NXPI", company: "NXP Semiconductors", theme: "Auto and edge AI chips" },
+  { ticker: "MCHP", company: "Microchip Technology", theme: "Embedded AI chips" },
+  { ticker: "MPWR", company: "Monolithic Power Systems", theme: "AI power management" },
+  { ticker: "TER", company: "Teradyne", theme: "AI chip testing" },
+  { ticker: "STM", company: "STMicroelectronics", theme: "European semiconductor AI exposure" },
+  { ticker: "WDC", company: "Western Digital", theme: "AI storage demand" },
+  { ticker: "STX", company: "Seagate Technology", theme: "AI storage demand" },
+  { ticker: "IBM", company: "IBM", theme: "Enterprise AI" },
+  { ticker: "AAPL", company: "Apple", theme: "On-device AI" },
+  { ticker: "CRM", company: "Salesforce", theme: "Enterprise AI agents" },
+  { ticker: "SNOW", company: "Snowflake", theme: "AI data cloud" },
+  { ticker: "ADBE", company: "Adobe", theme: "Creative AI" },
+  { ticker: "DDOG", company: "Datadog", theme: "AI observability" },
+  { ticker: "MDB", company: "MongoDB", theme: "AI app database" },
+  { ticker: "PANW", company: "Palo Alto Networks", theme: "AI cybersecurity" },
+  { ticker: "ZS", company: "Zscaler", theme: "AI cybersecurity" },
+  { ticker: "VST", company: "Vistra", theme: "AI datacenter power" },
+  { ticker: "CEG", company: "Constellation Energy", theme: "AI datacenter power" },
+  { ticker: "ETN", company: "Eaton", theme: "AI power equipment" },
+  { ticker: "PWR", company: "Quanta Services", theme: "AI grid infrastructure" },
+  { ticker: "GEV", company: "GE Vernova", theme: "AI power infrastructure" },
+  { ticker: "NRG", company: "NRG Energy", theme: "AI power demand" },
+  { ticker: "EQIX", company: "Equinix", theme: "AI data centers" },
+  { ticker: "DLR", company: "Digital Realty", theme: "AI data centers" },
+  { ticker: "NBIS", company: "Nebius Group", theme: "AI cloud capacity" },
+  { ticker: "HUT", company: "Hut 8", theme: "AI infrastructure pivot" },
 ];
 
 const positiveWords = [
@@ -548,7 +583,7 @@ function renderSocialMatrix() {
   }
 
   socialMatrix.innerHTML = aggregates
-    .slice(0, 10)
+    .slice(0, 12)
     .map(
       (item) => `
         <article class="matrix-card">
@@ -581,7 +616,7 @@ function renderSocialFeed() {
   const qualified = state.socialSignals
     .filter(isQualifiedSignal)
     .toSorted((a, b) => b.heat - a.heat || b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 12);
+    .slice(0, 16);
 
   if (!qualified.length) {
     socialSignalFeed.innerHTML = '<div class="empty-state">No qualified comments</div>';

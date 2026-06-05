@@ -185,3 +185,41 @@ Assistant response summary to be given:
 - Mention Stocktwits was checked but excluded from numeric scoring because public unauthenticated sentiment scores were N/A.
 - Mention build and mobile verification passed.
 - Mention the live Vercel URL after deployment completes.
+
+---
+
+Timestamp: 2026-06-05 13:26:28 HKT
+
+User request:
+"pls refresh and add more stocks"
+
+Assistant actions:
+- Expanded the front-end AI stock universe from 20 stocks to 55 stocks.
+- Added AI server, datacenter networking, semiconductor equipment, chip testing, storage, enterprise AI software, cybersecurity, power/grid, datacenter REIT, AI cloud, and AI infrastructure names.
+- New examples include SMCI, HPE, ANET, ASML, AMAT, LRCX, KLAC, QCOM, TXN, NXPI, MPWR, TER, STM, WDC, STX, IBM, AAPL, CRM, SNOW, ADBE, DDOG, MDB, PANW, ZS, VST, CEG, ETN, PWR, GEV, NRG, EQIX, DLR, NBIS, and HUT.
+- Kept the single-letter/common-word ticker `AI` out of the universe because it would create false positives for every mention of artificial intelligence.
+- Expanded refresh search queries to cover AI servers, datacenter networking, semiconductor equipment, edge AI, on-device AI, enterprise AI software, AI cybersecurity, AI datacenter power, datacenter REITs, and AI infrastructure.
+- Removed newly added subreddit groups that triggered Reddit over-18 gate; kept the stable public financial multireddit source.
+- Added conservative aliases for ambiguous tickers such as SNOW, CRM, DDOG, MDB, ARM, and HUT so normal English words do not become false ticker matches.
+- Added protection so a 0-signal refresh does not overwrite existing `social_ai_signals.json`.
+- Added thread-fetch fallback: if an individual Reddit thread is rate-limited, the search result itself is kept as a post-level signal.
+- Ran `npm run refresh:social`.
+- Reddit rate-limited several thread fetches with 429, so the final usable snapshot contains 25 public Reddit signals instead of the earlier 80-signal run.
+- Current refreshed snapshot tickers: MU, AVGO, MRVL, MSFT, CRWD, and GOOGL.
+- Current hottest AI stock from the refreshed snapshot: MU, Micron Technology, heat score 74.
+- Ran `npm run build` successfully.
+- Verified local built site at `http://127.0.0.1:4173` using headless Chrome:
+  - 25 public Reddit signals loaded.
+  - 4 qualified attention + emotion signals rendered.
+  - 6 matrix cards and 4 feed cards rendered.
+  - 55 ticker options available in the manual supplement selector.
+  - Existing AI model release event table still loaded 40 rows.
+  - Desktop had no horizontal overflow.
+  - 390px mobile viewport had no horizontal overflow; scrollWidth equaled clientWidth at 390px.
+
+Assistant response summary to be given:
+- Confirm refresh completed and the stock universe is now 55 AI-related names.
+- Mention current hottest stock in the refreshed snapshot is MU with heat score 74.
+- Mention Reddit rate-limited some thread pages, so current deployed snapshot has 25 usable signals.
+- Mention build and mobile verification passed.
+- Mention the live Vercel URL after deployment completes.
