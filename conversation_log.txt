@@ -116,3 +116,34 @@ Assistant response summary to be given:
 - Mention local URL `http://localhost:4173`.
 - Mention build and browser/mobile verification passed.
  
+---
+
+Timestamp: 2026-06-05 10:36:51 HKT
+
+User request:
+"i want to keep track of AI stock comments from social media, take those with good attention and emotion, i want you to meausre the sentiment matrix for the hottest AI stock"
+
+Assistant actions:
+- Preserved the existing AI model release / Alphabet stock reaction dashboard.
+- Added a front-end social sentiment matrix for AI stocks.
+- Added local signal capture for ticker, platform, likes, replies, reposts, source URL, and comment text.
+- Added scoring for attention, emotion, sentiment, conviction, risk, and overall heat.
+- Added adjustable attention and emotion thresholds, with only qualified comments shown in the feed.
+- Added aggregate ranking to identify the hottest AI stock from entered signals.
+- Stored signals in browser localStorage under `jensencall:socialSignals:v1`.
+- Added a safe URL renderer so only http/https source links are displayed.
+- Updated responsive CSS so the sentiment workbench, cards, sliders, and feed are mobile-friendly.
+- Ran `npm run build` successfully.
+- Verified the built site locally at `http://127.0.0.1:4173` using headless Chrome:
+  - Added NVDA and AMD test signals.
+  - NVDA ranked as hottest AI stock with heat score 90.
+  - 2 total signals, 1 qualified signal, 2 matrix cards, and 1 feed card rendered.
+  - Existing event table still loaded 40 rows.
+  - Desktop had no horizontal overflow.
+  - 390px mobile viewport had no horizontal overflow; scrollWidth equaled clientWidth at 390px.
+
+Assistant response summary to be given:
+- Confirm the site now has an AI stock social sentiment matrix.
+- Explain this version is a manual/localStorage tracker and does not scrape live social networks yet.
+- Mention build and desktop/mobile interaction verification passed.
+- Mention the live Vercel URL after deployment completes.

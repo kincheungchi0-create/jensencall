@@ -47,6 +47,101 @@
         </article>
       </section>
 
+      <section class="sentiment-panel" aria-label="AI stock social sentiment matrix">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Social Matrix</p>
+            <h2>AI stock 社群情緒追蹤</h2>
+          </div>
+          <p class="panel-note">Attention × Emotion × Sentiment × Conviction</p>
+        </div>
+
+        <div class="sentiment-summary" aria-label="Sentiment highlights">
+          <article class="metric-card compact">
+            <span>Hottest AI Stock</span>
+            <strong id="socialHotTicker">-</strong>
+            <small id="socialHotCompany">Awaiting signals</small>
+          </article>
+          <article class="metric-card compact">
+            <span>Heat Score</span>
+            <strong id="socialHotScore">-</strong>
+            <small>0-100 weighted matrix</small>
+          </article>
+          <article class="metric-card compact">
+            <span>Total Signals</span>
+            <strong id="socialSignalCount">0</strong>
+            <small>Local tracker</small>
+          </article>
+          <article class="metric-card compact">
+            <span>Qualified</span>
+            <strong id="socialQualifiedCount">0</strong>
+            <small>Attention + emotion filter</small>
+          </article>
+        </div>
+
+        <div class="sentiment-workbench">
+          <section class="signal-entry" aria-label="Add social signal">
+            <div class="entry-grid">
+              <label class="select-wrap">
+                <span>Ticker</span>
+                <select id="socialTicker"></select>
+              </label>
+              <label class="select-wrap">
+                <span>Platform</span>
+                <select id="socialPlatform">
+                  <option value="X">X</option>
+                  <option value="Reddit">Reddit</option>
+                  <option value="Stocktwits">Stocktwits</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="Discord">Discord</option>
+                  <option value="Manual">Manual</option>
+                </select>
+              </label>
+              <label class="number-wrap">
+                <span>Likes</span>
+                <input id="socialLikes" type="number" min="0" inputmode="numeric" value="0" />
+              </label>
+              <label class="number-wrap">
+                <span>Replies</span>
+                <input id="socialReplies" type="number" min="0" inputmode="numeric" value="0" />
+              </label>
+              <label class="number-wrap">
+                <span>Reposts</span>
+                <input id="socialReposts" type="number" min="0" inputmode="numeric" value="0" />
+              </label>
+              <label class="source-wrap">
+                <span>Source</span>
+                <input id="socialSource" type="url" inputmode="url" autocomplete="off" />
+              </label>
+            </div>
+            <label class="comment-wrap">
+              <span>Comment</span>
+              <textarea id="socialComment" rows="4"></textarea>
+            </label>
+            <div class="entry-actions">
+              <button id="addSocialSignal" class="button" type="button">Add Signal</button>
+              <button id="clearSocialSignals" class="button secondary" type="button">Clear Local</button>
+            </div>
+          </section>
+
+          <section class="threshold-panel" aria-label="Signal thresholds">
+            <label>
+              <span>Min Attention</span>
+              <input id="attentionThreshold" type="range" min="0" max="100" value="35" />
+              <strong id="attentionThresholdValue">35</strong>
+            </label>
+            <label>
+              <span>Min Emotion</span>
+              <input id="emotionThreshold" type="range" min="0" max="100" value="25" />
+              <strong id="emotionThresholdValue">25</strong>
+            </label>
+          </section>
+        </div>
+
+        <div id="socialMatrix" class="sentiment-matrix" aria-live="polite"></div>
+        <div id="socialSignalFeed" class="signal-feed" aria-live="polite"></div>
+      </section>
+
       <section class="analysis-band" aria-label="Interpretation">
         <div class="section-heading">
           <p class="eyebrow">Main Read</p>
