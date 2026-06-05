@@ -82,6 +82,40 @@
         <div id="socialMatrix" class="sentiment-matrix" aria-live="polite"></div>
         <div id="socialSignalFeed" class="signal-feed" aria-live="polite"></div>
 
+        <section class="mu-sentiment-panel" aria-label="MU social sentiment chart">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">$MU Focus</p>
+              <h2>Micron 社群情緒圖</h2>
+            </div>
+            <p id="muRefreshStamp" class="panel-note">Loading MU sentiment...</p>
+          </div>
+          <div class="sentiment-summary mu-summary" aria-label="MU sentiment highlights">
+            <article class="metric-card compact">
+              <span>MU Sentiment</span>
+              <strong id="muSentimentScore">-</strong>
+              <small>Average 0-100 score</small>
+            </article>
+            <article class="metric-card compact">
+              <span>Attention</span>
+              <strong id="muAttentionScore">-</strong>
+              <small>Votes + comments</small>
+            </article>
+            <article class="metric-card compact">
+              <span>Emotion</span>
+              <strong id="muEmotionScore">-</strong>
+              <small>High-intensity language</small>
+            </article>
+            <article class="metric-card compact">
+              <span>Qualified</span>
+              <strong id="muQualifiedCount">0</strong>
+              <small>Attention + emotion filter</small>
+            </article>
+          </div>
+          <div id="muSentimentChart" class="mu-sentiment-chart" aria-live="polite"></div>
+          <div id="muSentimentFeed" class="signal-feed mu-feed" aria-live="polite"></div>
+        </section>
+
         <div class="sentiment-workbench">
           <section class="signal-entry" aria-label="Add social signal">
             <div class="entry-grid">

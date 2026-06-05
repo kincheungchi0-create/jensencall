@@ -403,6 +403,106 @@ h2 {
   background: #fbfdff;
 }
 
+.mu-sentiment-panel {
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.mu-summary {
+  background: #fff;
+}
+
+.mu-sentiment-chart {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: #fbfdff;
+}
+
+.mu-chart-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 1fr) 150px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mu-chart-meta {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mu-chart-meta strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mu-chart-meta span,
+.mu-chart-values span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mu-chart-bar {
+  display: grid;
+  gap: 6px;
+}
+
+.mu-chart-bar > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mu-chart-track {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.mu-chart-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
+}
+
+.mu-chart-fill.bullish {
+  background: var(--teal);
+}
+
+.mu-chart-fill.bearish {
+  background: var(--red);
+}
+
+.mu-chart-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.mu-chart-values span {
+  padding: 7px 6px;
+  border-radius: 6px;
+  background: var(--soft);
+  text-align: center;
+}
+
+.mu-feed {
+  border-top: 1px solid var(--line);
+}
+
 .feed-card {
   display: grid;
   gap: 9px;
@@ -906,6 +1006,7 @@ td.note a {
   .sentiment-workbench,
   .sentiment-summary,
   .sentiment-matrix,
+  .mu-sentiment-chart,
   .signal-feed {
     padding: 12px;
   }
@@ -936,6 +1037,14 @@ td.note a {
 
   .sentiment-matrix {
     grid-template-columns: 1fr;
+  }
+
+  .mu-chart-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mu-chart-meta strong {
+    white-space: normal;
   }
 
   .matrix-stats {

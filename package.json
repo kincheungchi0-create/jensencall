@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "generate:ai-reaction": "node scripts/generate-ai-model-reaction.mjs",
-    "refresh:social": "node scripts/refresh-social-sentiment.mjs"
+    "refresh:social": "node scripts/refresh-social-sentiment.mjs",
+    "refresh:mu": "node scripts/refresh-mu-sentiment.mjs"
   }
 }

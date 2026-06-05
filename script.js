@@ -7,12 +7,15 @@ const state = {
   remoteSocialSignals: [],
   localSocialSignals: [],
   socialMeta: null,
+  muSignals: [],
+  muMeta: null,
   attentionThreshold: 35,
   emotionThreshold: 25,
 };
 
 const SOCIAL_STORAGE_KEY = "jensencall:socialSignals:v1";
 const SOCIAL_DATA_URL = "social_ai_signals.json";
+const MU_DATA_URL = "mu_social_sentiment.json";
 
 const aiStocks = [
   { ticker: "NVDA", company: "NVIDIA", theme: "AI accelerators" },
@@ -235,6 +238,13 @@ const emotionThresholdValue = document.querySelector("#emotionThresholdValue");
 const socialMatrix = document.querySelector("#socialMatrix");
 const socialSignalFeed = document.querySelector("#socialSignalFeed");
 const socialRefreshStamp = document.querySelector("#socialRefreshStamp");
+const muRefreshStamp = document.querySelector("#muRefreshStamp");
+const muSentimentScore = document.querySelector("#muSentimentScore");
+const muAttentionScore = document.querySelector("#muAttentionScore");
+const muEmotionScore = document.querySelector("#muEmotionScore");
+const muQualifiedCount = document.querySelector("#muQualifiedCount");
+const muSentimentChart = document.querySelector("#muSentimentChart");
+const muSentimentFeed = document.querySelector("#muSentimentFeed");
 
 function parseCsv(text) {
   const rows = [];
@@ -685,6 +695,117 @@ function renderSocialSentiment() {
   renderSocialFeed();
 }
 
+function signalEngagement(signal) {
+  return (Number(signal.likes) || 0) + (Number(signal.replies) || 0) * 2 + (Number(signal.reposts) || 0) * 3;
+}
+
+function sentimentTone(score) {
+  if (score >= 62) return { label: "Bullish", className: "bullish" };
+  if (score <= 42) return { label: "Bearish", className: "bearish" };
+  return { label: "Neutral", className: "" };
+}
+
+function scoreText(values, fallback = "-") {
+  const value = average(values);
+  return value === null ? fallback : String(roundScore(value));
+}
+
+function renderMuRefreshStamp() {
+  if (!muRefreshStamp) return;
+
+  if (state.muMeta?.generatedAt) {
+    const timestamp = formatRefreshTime(state.muMeta.generatedAt);
+    muRefreshStamp.textContent = `MU refreshed ${timestamp} · ${state.muSignals.length} public Reddit posts`;
+    return;
+  }
+
+  if (state.muMeta?.error) {
+    muRefreshStamp.textContent = "MU refresh unavailable";
+    return;
+  }
+
+  muRefreshStamp.textContent = "Loading MU sentiment...";
+}
+
+function renderMuSentiment() {
+  if (!muSentimentChart || !muSentimentFeed) return;
+
+  renderMuRefreshStamp();
+
+  const signals = state.muSignals;
+  const qualified = signals.filter(isQualifiedSignal);
+  const scoreBase = qualified.length ? qualified : signals;
+
+  muSentimentScore.textContent = scoreText(scoreBase.map((signal) => signal.sentiment));
+  muAttentionScore.textContent = scoreText(scoreBase.map((signal) => signal.attention));
+  muEmotionScore.textContent = scoreText(scoreBase.map((signal) => signal.emotion));
+  muQualifiedCount.textContent = `${qualified.length}/${signals.length}`;
+
+  if (!signals.length) {
+    muSentimentChart.innerHTML = '<div class="empty-state">No MU social signals yet</div>';
+    muSentimentFeed.innerHTML = '<div class="empty-state">No MU feed yet</div>';
+    return;
+  }
+
+  const rankedSignals = signals.toSorted(
+    (a, b) => b.heat - a.heat || signalEngagement(b) - signalEngagement(a) || b.createdAt.localeCompare(a.createdAt),
+  );
+
+  muSentimentChart.innerHTML = rankedSignals
+    .slice(0, 14)
+    .map((signal) => {
+      const tone = sentimentTone(signal.sentiment);
+      const sourceLabel = signal.sourceLabel || signal.subreddit || signal.platform;
+      const sourceTitle = signal.sourceTitle || signal.comment.slice(0, 90);
+      const createdAt = formatRefreshTime(signal.createdAt);
+
+      return `
+        <article class="mu-chart-row">
+          <div class="mu-chart-meta">
+            <span>${escapeHtml([sourceLabel, createdAt].filter(Boolean).join(" · "))}</span>
+            <strong>${escapeHtml(sourceTitle)}</strong>
+          </div>
+          <div class="mu-chart-bar">
+            <div class="mu-chart-track" aria-label="${escapeHtml(sourceTitle)} sentiment ${signal.sentiment}">
+              <span class="mu-chart-fill ${tone.className}" style="width: ${clamp(signal.sentiment)}%"></span>
+            </div>
+            <span>${tone.label} sentiment ${signal.sentiment}</span>
+          </div>
+          <div class="mu-chart-values">
+            <span>Attn ${signal.attention}</span>
+            <span>Emo ${signal.emotion}</span>
+            <span>Heat ${signal.heat}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  muSentimentFeed.innerHTML = rankedSignals
+    .slice(0, 6)
+    .map((signal) => {
+      const sourceUrl = safeSourceUrl(signal.source);
+      const source = sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">Source</a>` : "";
+      const sourceLabel = signal.sourceLabel || signal.subreddit || signal.platform;
+
+      return `
+        <article class="feed-card">
+          <div class="feed-meta">
+            <strong>MU</strong>
+            <span>${escapeHtml(sourceLabel)}</span>
+            <span>Heat ${signal.heat}</span>
+            <span>Sentiment ${signal.sentiment}</span>
+            <span>Attention ${signal.attention}</span>
+            <span>Emotion ${signal.emotion}</span>
+          </div>
+          <p>${escapeHtml(signal.comment)}</p>
+          ${source}
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function renderChart() {
   const rows = filteredRows().toSorted((a, b) => a.date.localeCompare(b.date));
 
@@ -766,6 +887,7 @@ function renderTable() {
 function render() {
   renderMetrics();
   renderSocialSentiment();
+  renderMuSentiment();
   renderChart();
   renderTable();
 }
@@ -846,16 +968,19 @@ clearSocialSignals.addEventListener("click", () => {
 attentionThreshold.addEventListener("input", (event) => {
   state.attentionThreshold = Number(event.target.value);
   renderSocialSentiment();
+  renderMuSentiment();
 });
 
 emotionThreshold.addEventListener("input", (event) => {
   state.emotionThreshold = Number(event.target.value);
   renderSocialSentiment();
+  renderMuSentiment();
 });
 
 renderSocialTickerOptions();
 loadSocialSignals();
 renderSocialSentiment();
+renderMuSentiment();
 
 fetch(SOCIAL_DATA_URL)
   .then((response) => {
@@ -871,6 +996,22 @@ fetch(SOCIAL_DATA_URL)
   .catch((error) => {
     state.socialMeta = { error: error.message };
     renderSocialSentiment();
+  });
+
+fetch(MU_DATA_URL)
+  .then((response) => {
+    if (!response.ok) throw new Error(`MU refresh failed: ${response.status}`);
+    return response.json();
+  })
+  .then((payload) => {
+    state.muMeta = payload;
+    state.muSignals = Array.isArray(payload.signals) ? payload.signals.map(scoreSignal) : [];
+    renderMuSentiment();
+  })
+  .catch((error) => {
+    state.muMeta = { error: error.message };
+    state.muSignals = [];
+    renderMuSentiment();
   });
 
 fetch("ai_model_google_reaction.csv")

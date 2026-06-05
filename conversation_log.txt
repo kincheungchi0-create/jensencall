@@ -223,3 +223,28 @@ Assistant response summary to be given:
 - Mention Reddit rate-limited some thread pages, so current deployed snapshot has 25 usable signals.
 - Mention build and mobile verification passed.
 - Mention the live Vercel URL after deployment completes.
+
+---
+
+Timestamp: 2026-06-05 14:49:52 HKT
+
+User request:
+"pls use measure the sentiment for stock $MU in social media and plot a chart"
+
+Assistant actions:
+- Added a MU-specific public social sentiment refresh script at `scripts/refresh-mu-sentiment.mjs`.
+- Used public old.reddit.com search pages without login across MU_Stock, stocks, StockMarket, and wallstreetbets.
+- Search queries focused on MU, Micron, AI memory, HBM, DRAM, NAND, Dell AI memory, and memory breakout terms.
+- Tightened the MU filter so visible excerpts must directly mention MU or Micron before being written to the dataset.
+- Ran `npm run refresh:mu`.
+- Generated `mu_social_sentiment.json` with 27 MU post-level Reddit signals.
+- Added `npm run refresh:mu` to `package.json`.
+- Updated the build script so `mu_social_sentiment.json` is copied into `dist`.
+- Added a MU-focused sentiment section to the website with summary cards, sentiment bar chart, and a high-heat source feed.
+- Reused the existing attention, emotion, sentiment, conviction, risk, and heat scoring model so MU scores are comparable with the main social matrix.
+
+Assistant response summary to be given:
+- Confirm the website now has a dedicated MU / Micron social sentiment chart.
+- Mention the current MU snapshot has 27 public Reddit post-level signals from the latest refresh.
+- Mention the measured MU sentiment, attention, emotion, qualified count, and mobile verification results after testing.
+- Mention the live Vercel URL after deployment completes.
