@@ -176,6 +176,7 @@ h2 {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 14px;
   padding: 14px;
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 

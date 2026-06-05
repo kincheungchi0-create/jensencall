@@ -10,6 +10,7 @@ const files = [
   ["index.html", "index.html"],
   ["styles.css", "styles.css"],
   ["script.js", "script.js"],
+  ["social_ai_signals.json", "social_ai_signals.json"],
   ["ai_model_google_reaction.csv", "ai_model_google_reaction.csv"],
   ["ai_model_google_reaction.md", "ai_model_google_reaction.md"],
   ["jensen_huang_stocks_extraction.csv", "jensen_huang_stocks_extraction.csv"],

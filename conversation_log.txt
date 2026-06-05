@@ -147,3 +147,41 @@ Assistant response summary to be given:
 - Explain this version is a manual/localStorage tracker and does not scrape live social networks yet.
 - Mention build and desktop/mobile interaction verification passed.
 - Mention the live Vercel URL after deployment completes.
+
+---
+
+Timestamp: 2026-06-05 11:23:52 HKT
+
+User request:
+"i dont want i input myself, i want you to run the search now and update it"
+
+Assistant actions:
+- Clarified the user wanted Codex to run the social search and refresh the website data, not rely on manual input.
+- Added `scripts/refresh-social-sentiment.mjs`.
+- Used public old.reddit.com search pages across stocks, StockMarket, wallstreetbets, NVDA_Stock, AMD_Stock, PLTR, BroadcomStock, and MU_Stock.
+- Search scope included AI stock, AI stocks, AI chip, AI infrastructure, Jensen NVDA AI, NVDA AMD AVGO AI, MSFT NVDA AI, PLTR AI, MU AI, GOOGL AI, TSMC AI, and CRWD AI.
+- Fixed AI keyword detection so `AI` is matched as a whole word instead of matching substrings like `raising`.
+- Generated `social_ai_signals.json` with 40 public Reddit social signals.
+- Noted Stocktwits public sentiment pages were reviewed, but unauthenticated pages exposed N/A sentiment/message-volume scores, so Stocktwits was not used as numeric input.
+- Updated `package.json` with `npm run refresh:social`.
+- Updated build output to copy `social_ai_signals.json`.
+- Updated the website to load the generated social snapshot automatically.
+- Preserved manual signal entry only as an optional supplement; clearing now removes manual entries only.
+- Moved the social matrix before the manual workbench so the auto-refreshed result appears first.
+- Expanded the sentiment lexicon for Reddit trading language, including FML, rugpull, smoked, sinks, diluting, all in, AI wave, and related terms.
+- Ran `npm run build` successfully.
+- Verified local built site at `http://127.0.0.1:4173` using headless Chrome:
+  - 40 social signals loaded from JSON.
+  - 5 qualified attention + emotion signals rendered.
+  - Current hottest AI stock from this snapshot: MU, Micron Technology, heat score 74.
+  - 10 matrix cards and 5 feed cards rendered.
+  - Existing AI model release event table still loaded 40 rows.
+  - Desktop had no horizontal overflow.
+  - 390px mobile viewport had no horizontal overflow; scrollWidth equaled clientWidth at 390px.
+
+Assistant response summary to be given:
+- Confirm the site has been refreshed from live public Reddit search.
+- Mention the current hottest stock in the refreshed snapshot is MU with heat score 74.
+- Mention Stocktwits was checked but excluded from numeric scoring because public unauthenticated sentiment scores were N/A.
+- Mention build and mobile verification passed.
+- Mention the live Vercel URL after deployment completes.

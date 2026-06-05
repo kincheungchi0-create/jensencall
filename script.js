@@ -4,11 +4,15 @@ const state = {
   firm: "all",
   search: "",
   socialSignals: [],
+  remoteSocialSignals: [],
+  localSocialSignals: [],
+  socialMeta: null,
   attentionThreshold: 35,
   emotionThreshold: 25,
 };
 
 const SOCIAL_STORAGE_KEY = "jensencall:socialSignals:v1";
+const SOCIAL_DATA_URL = "social_ai_signals.json";
 
 const aiStocks = [
   { ticker: "NVDA", company: "NVIDIA", theme: "AI accelerators" },
@@ -26,6 +30,11 @@ const aiStocks = [
   { ticker: "COHR", company: "Coherent", theme: "Optical AI datacenter links" },
   { ticker: "SNPS", company: "Synopsys", theme: "AI chip design tools" },
   { ticker: "INTC", company: "Intel", theme: "AI turnaround and foundry" },
+  { ticker: "MU", company: "Micron Technology", theme: "AI memory and HBM" },
+  { ticker: "CRWD", company: "CrowdStrike", theme: "AI cybersecurity" },
+  { ticker: "VRT", company: "Vertiv", theme: "AI datacenter power" },
+  { ticker: "ORCL", company: "Oracle", theme: "Cloud AI capacity" },
+  { ticker: "DELL", company: "Dell Technologies", theme: "AI servers" },
 ];
 
 const positiveWords = [
@@ -33,13 +42,16 @@ const positiveWords = [
   "backlog",
   "beat",
   "beats",
+  "best",
   "breakout",
   "bull",
   "bullish",
   "buy",
+  "buying",
   "calls",
   "cheap",
   "dominant",
+  "future",
   "growth",
   "leader",
   "long",
@@ -61,28 +73,43 @@ const negativeWords = [
   "capex",
   "collapse",
   "competition",
+  "crash",
   "cut",
   "delay",
+  "diluting",
+  "disappoints",
   "dump",
   "expensive",
+  "fml",
   "inventory",
   "lawsuit",
+  "loss",
   "miss",
   "overvalued",
+  "plunged",
   "risk",
+  "rugpull",
   "sell",
   "short",
+  "sinks",
   "slowdown",
+  "smoked",
   "weak",
 ];
 
 const emotionWords = [
   "amazing",
+  "all in",
+  "bagholder",
   "crazy",
+  "crash",
   "crush",
+  "diluting",
   "dominates",
+  "epic",
   "explode",
   "fear",
+  "fml",
   "fomo",
   "huge",
   "insane",
@@ -91,7 +118,12 @@ const emotionWords = [
   "monster",
   "moon",
   "panic",
+  "plunged",
   "rip",
+  "rugpull",
+  "sinks",
+  "smoked",
+  "wave",
   "wild",
 ];
 
@@ -99,8 +131,12 @@ const convictionWords = [
   "adding",
   "all in",
   "breakout",
+  "buying",
   "calls",
   "conviction",
+  "go up",
+  "heloc",
+  "hold",
   "loading",
   "long",
   "must own",
@@ -116,12 +152,19 @@ const riskWords = [
   "capex",
   "china",
   "competition",
+  "diluting",
+  "disappoints",
   "export",
+  "loss",
   "margin pressure",
+  "plunged",
   "regulation",
+  "rugpull",
   "saturation",
   "short",
+  "sinks",
   "slowdown",
+  "smoked",
   "valuation",
 ];
 
@@ -156,6 +199,7 @@ const attentionThresholdValue = document.querySelector("#attentionThresholdValue
 const emotionThresholdValue = document.querySelector("#emotionThresholdValue");
 const socialMatrix = document.querySelector("#socialMatrix");
 const socialSignalFeed = document.querySelector("#socialSignalFeed");
+const socialRefreshStamp = document.querySelector("#socialRefreshStamp");
 
 function parseCsv(text) {
   const rows = [];
@@ -333,9 +377,13 @@ function isQualifiedSignal(signal) {
   return signal.attention >= state.attentionThreshold && signal.emotion >= state.emotionThreshold;
 }
 
+function syncSocialSignals() {
+  state.socialSignals = [...state.remoteSocialSignals, ...state.localSocialSignals].map(scoreSignal);
+}
+
 function saveSocialSignals() {
   try {
-    localStorage.setItem(SOCIAL_STORAGE_KEY, JSON.stringify(state.socialSignals));
+    localStorage.setItem(SOCIAL_STORAGE_KEY, JSON.stringify(state.localSocialSignals));
   } catch {
     // Storage can fail in private browsing; the live matrix still works for the current session.
   }
@@ -344,10 +392,11 @@ function saveSocialSignals() {
 function loadSocialSignals() {
   try {
     const parsed = JSON.parse(localStorage.getItem(SOCIAL_STORAGE_KEY) || "[]");
-    state.socialSignals = Array.isArray(parsed) ? parsed.map(scoreSignal) : [];
+    state.localSocialSignals = Array.isArray(parsed) ? parsed.map(scoreSignal) : [];
   } catch {
-    state.socialSignals = [];
+    state.localSocialSignals = [];
   }
+  syncSocialSignals();
 }
 
 function aggregateSocialSignals() {
@@ -543,11 +592,13 @@ function renderSocialFeed() {
     .map((signal) => {
       const sourceUrl = safeSourceUrl(signal.source);
       const source = sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">Source</a>` : "";
+      const sourceLabel = signal.sourceLabel || signal.subreddit || signal.platform;
       return `
         <article class="feed-card">
           <div class="feed-meta">
             <strong>${escapeHtml(signal.ticker)}</strong>
             <span>${escapeHtml(signal.platform)}</span>
+            <span>${escapeHtml(sourceLabel)}</span>
             <span>Heat ${signal.heat}</span>
             <span>Attention ${signal.attention}</span>
             <span>Emotion ${signal.emotion}</span>
@@ -561,9 +612,40 @@ function renderSocialFeed() {
     .join("");
 }
 
+function formatRefreshTime(isoValue) {
+  if (!isoValue) return "";
+  const date = new Date(isoValue);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderSocialRefreshStamp() {
+  if (!socialRefreshStamp) return;
+
+  if (state.socialMeta?.generatedAt) {
+    const timestamp = formatRefreshTime(state.socialMeta.generatedAt);
+    socialRefreshStamp.textContent =
+      `Auto refreshed ${timestamp} · ${state.remoteSocialSignals.length} public Reddit signals`;
+    return;
+  }
+
+  if (state.socialMeta?.error) {
+    socialRefreshStamp.textContent = "Public refresh unavailable · manual tracker still active";
+    return;
+  }
+
+  socialRefreshStamp.textContent = "Loading public social refresh...";
+}
+
 function renderSocialSentiment() {
   attentionThresholdValue.textContent = state.attentionThreshold;
   emotionThresholdValue.textContent = state.emotionThreshold;
+  renderSocialRefreshStamp();
   renderSocialMatrix();
   renderSocialFeed();
 }
@@ -681,7 +763,8 @@ function addSignalFromForm() {
     createdAt: new Date().toISOString(),
   });
 
-  state.socialSignals.unshift(signal);
+  state.localSocialSignals.unshift(signal);
+  syncSocialSignals();
   saveSocialSignals();
 
   socialComment.value = "";
@@ -717,9 +800,10 @@ searchInput.addEventListener("input", (event) => {
 addSocialSignal.addEventListener("click", addSignalFromForm);
 
 clearSocialSignals.addEventListener("click", () => {
-  if (!state.socialSignals.length) return;
-  if (!window.confirm("Clear local social signals?")) return;
-  state.socialSignals = [];
+  if (!state.localSocialSignals.length) return;
+  if (!window.confirm("Clear manual social signals?")) return;
+  state.localSocialSignals = [];
+  syncSocialSignals();
   saveSocialSignals();
   renderSocialSentiment();
 });
@@ -737,6 +821,22 @@ emotionThreshold.addEventListener("input", (event) => {
 renderSocialTickerOptions();
 loadSocialSignals();
 renderSocialSentiment();
+
+fetch(SOCIAL_DATA_URL)
+  .then((response) => {
+    if (!response.ok) throw new Error(`Social refresh failed: ${response.status}`);
+    return response.json();
+  })
+  .then((payload) => {
+    state.socialMeta = payload;
+    state.remoteSocialSignals = Array.isArray(payload.signals) ? payload.signals.map(scoreSignal) : [];
+    syncSocialSignals();
+    renderSocialSentiment();
+  })
+  .catch((error) => {
+    state.socialMeta = { error: error.message };
+    renderSocialSentiment();
+  });
 
 fetch("ai_model_google_reaction.csv")
   .then((response) => {

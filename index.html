@@ -53,7 +53,7 @@
             <p class="eyebrow">Social Matrix</p>
             <h2>AI stock 社群情緒追蹤</h2>
           </div>
-          <p class="panel-note">Attention × Emotion × Sentiment × Conviction</p>
+          <p id="socialRefreshStamp" class="panel-note">Loading public social refresh...</p>
         </div>
 
         <div class="sentiment-summary" aria-label="Sentiment highlights">
@@ -70,7 +70,7 @@
           <article class="metric-card compact">
             <span>Total Signals</span>
             <strong id="socialSignalCount">0</strong>
-            <small>Local tracker</small>
+            <small>Auto refresh + manual</small>
           </article>
           <article class="metric-card compact">
             <span>Qualified</span>
@@ -78,6 +78,9 @@
             <small>Attention + emotion filter</small>
           </article>
         </div>
+
+        <div id="socialMatrix" class="sentiment-matrix" aria-live="polite"></div>
+        <div id="socialSignalFeed" class="signal-feed" aria-live="polite"></div>
 
         <div class="sentiment-workbench">
           <section class="signal-entry" aria-label="Add social signal">
@@ -119,8 +122,8 @@
               <textarea id="socialComment" rows="4"></textarea>
             </label>
             <div class="entry-actions">
-              <button id="addSocialSignal" class="button" type="button">Add Signal</button>
-              <button id="clearSocialSignals" class="button secondary" type="button">Clear Local</button>
+              <button id="addSocialSignal" class="button" type="button">Add Manual</button>
+              <button id="clearSocialSignals" class="button secondary" type="button">Clear Manual</button>
             </div>
           </section>
 
@@ -137,9 +140,6 @@
             </label>
           </section>
         </div>
-
-        <div id="socialMatrix" class="sentiment-matrix" aria-live="polite"></div>
-        <div id="socialSignalFeed" class="signal-feed" aria-live="polite"></div>
       </section>
 
       <section class="analysis-band" aria-label="Interpretation">
