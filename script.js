@@ -243,6 +243,7 @@ const muSentimentScore = document.querySelector("#muSentimentScore");
 const muAttentionScore = document.querySelector("#muAttentionScore");
 const muEmotionScore = document.querySelector("#muEmotionScore");
 const muQualifiedCount = document.querySelector("#muQualifiedCount");
+const muTrendChart = document.querySelector("#muTrendChart");
 const muSentimentChart = document.querySelector("#muSentimentChart");
 const muSentimentFeed = document.querySelector("#muSentimentFeed");
 
@@ -710,12 +711,67 @@ function scoreText(values, fallback = "-") {
   return value === null ? fallback : String(roundScore(value));
 }
 
+function parseDateValue(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function utcDateKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateKey(key) {
+  const date = parseDateValue(`${key}T00:00:00Z`);
+  if (!date) return key;
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+function recentDayKeys(referenceIso, days) {
+  const end = parseDateValue(referenceIso) || new Date();
+  end.setUTCHours(0, 0, 0, 0);
+  return Array.from({ length: days + 1 }, (_, index) => {
+    const date = new Date(end);
+    date.setUTCDate(end.getUTCDate() - (days - index));
+    return utcDateKey(date);
+  });
+}
+
+function inRecentWindow(signal, referenceIso, days) {
+  const createdAt = parseDateValue(signal.createdAt);
+  if (!createdAt) return false;
+  const end = parseDateValue(referenceIso) || new Date();
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - days);
+  return createdAt >= start && createdAt <= end;
+}
+
+function weightedAverage(items, valueGetter, weightGetter) {
+  let total = 0;
+  let weightTotal = 0;
+
+  for (const item of items) {
+    const value = valueGetter(item);
+    if (!Number.isFinite(value)) continue;
+    const weight = Math.max(0.2, weightGetter(item));
+    total += value * weight;
+    weightTotal += weight;
+  }
+
+  return weightTotal ? total / weightTotal : null;
+}
+
+function trendWeight(signal) {
+  return 1 + Math.log10(signalEngagement(signal) + 1);
+}
+
 function renderMuRefreshStamp() {
   if (!muRefreshStamp) return;
 
   if (state.muMeta?.generatedAt) {
     const timestamp = formatRefreshTime(state.muMeta.generatedAt);
-    muRefreshStamp.textContent = `MU refreshed ${timestamp} · ${state.muSignals.length} public Reddit posts`;
+    const days = Number(state.muMeta.lookbackDays) || 30;
+    muRefreshStamp.textContent =
+      `MU refreshed ${timestamp} · ${state.muSignals.length} public Reddit posts · last ${days} days`;
     return;
   }
 
@@ -727,12 +783,131 @@ function renderMuRefreshStamp() {
   muRefreshStamp.textContent = "Loading MU sentiment...";
 }
 
+function renderMuTrendChart(signals) {
+  if (!muTrendChart) return;
+
+  const days = Math.max(7, Math.min(45, Number(state.muMeta?.lookbackDays) || 30));
+  const dayKeys = recentDayKeys(state.muMeta?.generatedAt, days);
+  const grouped = new Map(dayKeys.map((key) => [key, []]));
+
+  for (const signal of signals) {
+    const createdAt = parseDateValue(signal.createdAt);
+    if (!createdAt) continue;
+    const key = utcDateKey(createdAt);
+    if (!grouped.has(key)) continue;
+    grouped.get(key).push(signal);
+  }
+
+  const series = dayKeys.map((key) => {
+    const dailySignals = grouped.get(key) || [];
+    return {
+      key,
+      signals: dailySignals.length,
+      sentiment: weightedAverage(dailySignals, (signal) => signal.sentiment, trendWeight),
+      attention: average(dailySignals.map((signal) => signal.attention)),
+      emotion: average(dailySignals.map((signal) => signal.emotion)),
+    };
+  });
+  const plotted = series.filter((item) => Number.isFinite(item.sentiment));
+
+  if (!plotted.length) {
+    muTrendChart.innerHTML = '<div class="empty-state">No recent MU trend points</div>';
+    return;
+  }
+
+  const width = 720;
+  const height = 240;
+  const paddingX = 34;
+  const paddingTop = 20;
+  const lineHeight = 150;
+  const volumeTop = 188;
+  const volumeHeight = 32;
+  const usableWidth = width - paddingX * 2;
+  const xForIndex = (index) => paddingX + (index / Math.max(1, series.length - 1)) * usableWidth;
+  const yForSentiment = (value) => paddingTop + ((100 - clamp(value)) / 100) * lineHeight;
+  const maxSignals = Math.max(1, ...series.map((item) => item.signals));
+  const points = series
+    .map((item, index) => (Number.isFinite(item.sentiment) ? `${xForIndex(index).toFixed(1)},${yForSentiment(item.sentiment).toFixed(1)}` : ""))
+    .filter(Boolean)
+    .join(" ");
+  const averageSentiment = weightedAverage(signals, (signal) => signal.sentiment, trendWeight);
+  const highPoint = plotted.toSorted((a, b) => b.sentiment - a.sentiment)[0];
+  const lowPoint = plotted.toSorted((a, b) => a.sentiment - b.sentiment)[0];
+
+  const circles = series
+    .map((item, index) => {
+      if (!Number.isFinite(item.sentiment)) return "";
+      const tone = sentimentTone(item.sentiment);
+      return `
+        <circle class="mu-trend-point ${tone.className}" cx="${xForIndex(index).toFixed(1)}" cy="${yForSentiment(
+          item.sentiment,
+        ).toFixed(1)}" r="${item.signals > 2 ? 4.8 : 3.8}">
+          <title>${escapeHtml(formatDateKey(item.key))}: sentiment ${roundScore(item.sentiment)}, ${item.signals} posts</title>
+        </circle>
+      `;
+    })
+    .join("");
+
+  const volumeBars = series
+    .map((item, index) => {
+      const barHeight = item.signals ? Math.max(3, (item.signals / maxSignals) * volumeHeight) : 2;
+      const x = xForIndex(index) - 4;
+      const y = volumeTop + volumeHeight - barHeight;
+      return `<rect class="mu-trend-volume" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="8" height="${barHeight.toFixed(
+        1,
+      )}" rx="2"></rect>`;
+    })
+    .join("");
+
+  muTrendChart.innerHTML = `
+    <article class="mu-trend-card">
+      <div class="mu-trend-head">
+        <div>
+          <span>Recent 1M Trend</span>
+          <strong>${averageSentiment === null ? "-" : roundScore(averageSentiment)}</strong>
+        </div>
+        <div>
+          <span>High</span>
+          <strong>${roundScore(highPoint.sentiment)}</strong>
+          <small>${escapeHtml(formatDateKey(highPoint.key))}</small>
+        </div>
+        <div>
+          <span>Low</span>
+          <strong>${roundScore(lowPoint.sentiment)}</strong>
+          <small>${escapeHtml(formatDateKey(lowPoint.key))}</small>
+        </div>
+        <div>
+          <span>Posts</span>
+          <strong>${signals.length}</strong>
+        </div>
+      </div>
+      <svg class="mu-trend-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="MU recent one month sentiment trend">
+        <line class="mu-trend-grid" x1="${paddingX}" x2="${width - paddingX}" y1="${yForSentiment(75)}" y2="${yForSentiment(75)}"></line>
+        <line class="mu-trend-grid mid" x1="${paddingX}" x2="${width - paddingX}" y1="${yForSentiment(50)}" y2="${yForSentiment(50)}"></line>
+        <line class="mu-trend-grid" x1="${paddingX}" x2="${width - paddingX}" y1="${yForSentiment(25)}" y2="${yForSentiment(25)}"></line>
+        <text class="mu-trend-label" x="4" y="${yForSentiment(75) + 4}">75</text>
+        <text class="mu-trend-label" x="4" y="${yForSentiment(50) + 4}">50</text>
+        <text class="mu-trend-label" x="4" y="${yForSentiment(25) + 4}">25</text>
+        ${volumeBars}
+        <polyline class="mu-trend-line" points="${points}"></polyline>
+        ${circles}
+      </svg>
+      <div class="mu-trend-axis">
+        <span>${escapeHtml(formatDateKey(dayKeys[0]))}</span>
+        <span>${escapeHtml(formatDateKey(dayKeys[Math.floor(dayKeys.length / 2)]))}</span>
+        <span>${escapeHtml(formatDateKey(dayKeys.at(-1)))}</span>
+      </div>
+    </article>
+  `;
+}
+
 function renderMuSentiment() {
   if (!muSentimentChart || !muSentimentFeed) return;
 
   renderMuRefreshStamp();
 
-  const signals = state.muSignals;
+  const days = Math.max(7, Math.min(45, Number(state.muMeta?.lookbackDays) || 30));
+  const signals = state.muSignals.filter((signal) => inRecentWindow(signal, state.muMeta?.generatedAt, days));
   const qualified = signals.filter(isQualifiedSignal);
   const scoreBase = qualified.length ? qualified : signals;
 
@@ -742,10 +917,13 @@ function renderMuSentiment() {
   muQualifiedCount.textContent = `${qualified.length}/${signals.length}`;
 
   if (!signals.length) {
+    if (muTrendChart) muTrendChart.innerHTML = '<div class="empty-state">No recent MU trend points</div>';
     muSentimentChart.innerHTML = '<div class="empty-state">No MU social signals yet</div>';
     muSentimentFeed.innerHTML = '<div class="empty-state">No MU feed yet</div>';
     return;
   }
+
+  renderMuTrendChart(signals);
 
   const rankedSignals = signals.toSorted(
     (a, b) => b.heat - a.heat || signalEngagement(b) - signalEngagement(a) || b.createdAt.localeCompare(a.createdAt),

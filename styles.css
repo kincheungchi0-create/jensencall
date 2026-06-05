@@ -412,6 +412,107 @@ h2 {
   background: #fff;
 }
 
+.mu-trend-chart {
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: #f6f9fc;
+}
+
+.mu-trend-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mu-trend-head {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border-bottom: 1px solid var(--line);
+  background: var(--line);
+}
+
+.mu-trend-head > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px;
+  background: #fff;
+}
+
+.mu-trend-head span,
+.mu-trend-head small,
+.mu-trend-axis span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mu-trend-head strong {
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mu-trend-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 210px;
+  padding: 8px 10px 0;
+}
+
+.mu-trend-grid {
+  stroke: #dbe5ef;
+  stroke-width: 1;
+}
+
+.mu-trend-grid.mid {
+  stroke: #b8c7d8;
+  stroke-dasharray: 5 5;
+}
+
+.mu-trend-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mu-trend-line {
+  fill: none;
+  stroke: var(--blue);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.mu-trend-point {
+  fill: var(--blue);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.mu-trend-point.bullish {
+  fill: var(--teal);
+}
+
+.mu-trend-point.bearish {
+  fill: var(--red);
+}
+
+.mu-trend-volume {
+  fill: #9fb3c8;
+  opacity: 0.5;
+}
+
+.mu-trend-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px 14px;
+}
+
 .mu-sentiment-chart {
   display: grid;
   gap: 10px;
@@ -1006,6 +1107,7 @@ td.note a {
   .sentiment-workbench,
   .sentiment-summary,
   .sentiment-matrix,
+  .mu-trend-chart,
   .mu-sentiment-chart,
   .signal-feed {
     padding: 12px;
@@ -1037,6 +1139,15 @@ td.note a {
 
   .sentiment-matrix {
     grid-template-columns: 1fr;
+  }
+
+  .mu-trend-head {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mu-trend-svg {
+    min-height: 185px;
+    padding-inline: 6px;
   }
 
   .mu-chart-row {

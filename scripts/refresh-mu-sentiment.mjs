@@ -12,15 +12,23 @@ const execFileAsync = promisify(execFile);
 const USER_AGENT = "Mozilla/5.0 jensencall-mu-refresh/1.0";
 const REDDIT_MULTI = "MU_Stock+stocks+StockMarket+wallstreetbets";
 const GENERATED_AT = new Date().toISOString();
+const LOOKBACK_DAYS = 30;
+const SEARCH_TIME_RANGE = "month";
 
 const searchQueries = [
   "MU AI memory HBM",
   "Micron AI memory",
   "MU HBM DRAM",
+  "MU stock",
+  "Micron stock",
+  "MU earnings AI",
+  "Micron HBM",
+  "Micron DRAM NAND",
   "Micron breakout memory",
   "MU Dell AI memory",
-  "Micron NAND DRAM AI",
 ];
+
+const searchSorts = ["new", "top", "comments"];
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,6 +83,9 @@ function mentionsAiMemory(text) {
   const lower = String(text ?? "").toLowerCase();
   return [
     "ai",
+    "$mu",
+    " mu ",
+    "micron",
     "hbm",
     "dram",
     "nand",
@@ -85,10 +96,40 @@ function mentionsAiMemory(text) {
     "datacenter",
     "data center",
     "breakout",
+    "stock",
+    "shares",
+    "earnings",
+    "guidance",
+    "calls",
+    "puts",
+    "buy",
+    "sell",
+    "hold",
+    "long",
+    "short",
+    "dip",
+    "portfolio",
+    "price target",
   ].some((term) => {
     if (term === "ai") return /(^|[^a-z0-9])ai([^a-z0-9]|$)/.test(lower);
+    if (term === "$mu") return lower.includes("$mu");
+    if (term === " mu ") return /(^|[^a-z0-9])mu([^a-z0-9]|$)/i.test(lower);
     return lower.includes(term);
   });
+}
+
+function parseDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function inLookbackWindow(signal) {
+  const createdAt = parseDate(signal.createdAt);
+  if (!createdAt) return false;
+  const generatedAt = parseDate(GENERATED_AT) || new Date();
+  const start = new Date(generatedAt);
+  start.setUTCDate(start.getUTCDate() - LOOKBACK_DAYS);
+  return createdAt >= start && createdAt <= generatedAt;
 }
 
 async function fetchText(url) {
@@ -100,14 +141,23 @@ async function fetchText(url) {
   return stdout;
 }
 
-function searchUrl(query) {
+function searchUrl(query, sort = "new", after = "") {
   const params = new URLSearchParams({
     q: query,
     restrict_sr: "on",
-    sort: "top",
-    t: "week",
+    sort,
+    t: SEARCH_TIME_RANGE,
   });
+  if (after) {
+    params.set("count", "25");
+    params.set("after", after);
+  }
   return `https://old.reddit.com/r/${REDDIT_MULTI}/search?${params.toString()}`;
+}
+
+function extractNextAfter(html) {
+  const match = html.match(/after=(t3_[a-z0-9]+)[^"]*" rel="nofollow next"/i);
+  return match ? match[1] : "";
 }
 
 function parseSearchResults(html) {
@@ -151,27 +201,38 @@ function parseSearchResults(html) {
       };
     })
     .filter(Boolean)
-    .filter((signal) => signal.likes + signal.replies * 2 >= 20);
+    .filter(inLookbackWindow)
+    .filter((signal) => signal.likes + signal.replies * 2 >= 8);
 }
 
 const signalsByUrl = new Map();
 const warnings = [];
 
 for (const query of searchQueries) {
-  console.log(`Searching MU social sentiment: ${query}`);
-  try {
-    const html = await fetchText(searchUrl(query));
-    for (const signal of parseSearchResults(html)) {
-      const existing = signalsByUrl.get(signal.source);
-      if (!existing || existing.likes + existing.replies * 2 < signal.likes + signal.replies * 2) {
-        signalsByUrl.set(signal.source, signal);
+  for (const sort of searchSorts) {
+    const maxPages = sort === "new" ? 2 : 1;
+    let after = "";
+
+    for (let page = 0; page < maxPages; page += 1) {
+      console.log(`Searching MU social sentiment: ${query} · ${sort} · page ${page + 1}`);
+      try {
+        const html = await fetchText(searchUrl(query, sort, after));
+        for (const signal of parseSearchResults(html)) {
+          const existing = signalsByUrl.get(signal.source);
+          if (!existing || existing.likes + existing.replies * 2 < signal.likes + signal.replies * 2) {
+            signalsByUrl.set(signal.source, signal);
+          }
+        }
+        after = sort === "new" ? extractNextAfter(html) : "";
+        if (!after) break;
+      } catch (error) {
+        warnings.push(`${query} ${sort}: ${error.message}`);
+        console.warn(`Search failed: ${error.message}`);
+        break;
       }
+      await sleep(700);
     }
-  } catch (error) {
-    warnings.push(`${query}: ${error.message}`);
-    console.warn(`Search failed: ${error.message}`);
   }
-  await sleep(900);
 }
 
 const signals = Array.from(signalsByUrl.values()).toSorted(
@@ -186,11 +247,14 @@ const payload = {
   generatedAt: GENERATED_AT,
   ticker: "MU",
   company: "Micron Technology",
-  source: "Public Reddit old.reddit.com search, top week, fetched without login",
+  lookbackDays: LOOKBACK_DAYS,
+  timeRange: SEARCH_TIME_RANGE,
+  source: "Public Reddit old.reddit.com search, past month, fetched without login",
   searchedQueries: searchQueries,
+  searchedSorts: searchSorts,
   warnings,
-  note: "Post-level Reddit search signals only; no login-only social metrics were used.",
-  signals: signals.slice(0, 30),
+  note: "Post-level Reddit search signals only; no login-only social metrics were used. Results are filtered to posts dated within the latest 30 days at refresh time.",
+  signals: signals.slice(0, 90),
 };
 
 await fs.writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`);

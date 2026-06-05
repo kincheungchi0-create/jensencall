@@ -248,3 +248,40 @@ Assistant response summary to be given:
 - Mention the current MU snapshot has 27 public Reddit post-level signals from the latest refresh.
 - Mention the measured MU sentiment, attention, emotion, qualified count, and mobile verification results after testing.
 - Mention the live Vercel URL after deployment completes.
+
+---
+
+Timestamp: 2026-06-05 15:36:01 HKT
+
+User request:
+"i want a chart of sentiment for recent one month"
+
+Assistant actions:
+- Changed the MU refresh scope from top week to public Reddit search over the past month.
+- Expanded MU refresh to combine `new`, `top`, and `comments` search sorts for better time distribution.
+- Added month-focused queries including MU stock, Micron stock, MU earnings AI, Micron HBM, and Micron DRAM NAND.
+- Kept the visible-excerpt filter requiring direct MU or Micron mention.
+- Ran `npm run refresh:mu`.
+- Generated `mu_social_sentiment.json` with 90 public Reddit post-level signals.
+- Current month dataset range: 2026-05-06T08:00:27+00:00 through 2026-06-05T02:15:19+00:00.
+- Added `lookbackDays: 30`, `timeRange: "month"`, and `searchedSorts` metadata to the JSON.
+- Added a new 30-day MU sentiment trend chart above the top-post sentiment bars.
+- The trend chart shows daily sentiment line points plus daily post-volume bars.
+- Fixed the chart date axis to include the partial first day in the 30-day lookback window.
+- Ran `npm run build` successfully.
+- Verified local built site at `http://127.0.0.1:4173` using headless Chrome:
+  - MU refreshed stamp: 90 public Reddit posts, last 30 days.
+  - MU summary: sentiment 57, attention 95, emotion 45, qualified 7/90.
+  - Trend card: Recent 1M Trend 54, high 95 on May 19, low 36 on May 14, posts 90.
+  - Trend axis: May 6, May 21, Jun 5.
+  - Trend rendered 31 volume bars and 29 sentiment points.
+  - Top-post bars rendered 14 rows and feed rendered 6 cards.
+  - Existing event table still loaded 40 rows.
+  - Desktop had no horizontal overflow.
+  - 390px mobile viewport had no horizontal overflow; scrollWidth equaled clientWidth at 390px.
+
+Assistant response summary to be given:
+- Confirm the recent one-month MU sentiment chart was added and refreshed.
+- Mention dataset range, 90 Reddit signals, trend score 54, MU summary values 57/95/45, qualified 7/90.
+- Mention mobile verification passed.
+- Mention the live Vercel URL after deployment completes.
